@@ -1,32 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1E40AF;
-  --color-primary-dark: #1e3a8a;
-  --color-secondary: #475569;
-  --color-accent: #6366f1;
+  --color-primary: #2563EB;
+  --color-primary-dark: #1D4ED8;
+  --color-secondary: #64748B;
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-danger: #DC2626;
+  --color-bg-light: #F8FAFC;
+  --color-card-light: #FFFFFF;
+  --color-border-light: #E2E8F0;
+  --color-text-main: #0F172A;
+  --color-text-sub: #64748B;
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700;
+    @apply bg-white shadow-lg border border-[#E2E8F0] rounded-[16px];
   }
-  .glass-dark {
-    @apply bg-slate-800 shadow-xl border border-slate-700;
+  .glass-hover {
+    @apply hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 ease-out;
   }
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased min-h-screen selection:bg-primary/30;
+  @apply bg-[#F8FAFC] text-[#0F172A] antialiased min-h-screen font-sans selection:bg-[#2563EB]/20;
 }
 
-.dark body {
-  @apply bg-slate-950 text-slate-50;
-}
-
-/* Custom Scrollbar for a premium feel */
+/* Custom Scrollbar for a sleek Linear/Stripe aesthetic */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -34,12 +38,6 @@ body {
 ::-webkit-scrollbar-thumb {
   @apply bg-slate-300 rounded-full;
 }
-.dark ::-webkit-scrollbar-thumb {
-  @apply bg-slate-700;
-}
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-400;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-600;
 }
