@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const Pagination = ({ currentPage, totalPages, onPageChange, totalItems, itemsPerPage }) => {
+const Pagination = ({ currentPage, totalPages, onPageChange, totalItems, itemsPerPage, itemLabel = "students" }) => {
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -12,7 +12,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, totalItems, itemsPe
       <div className="text-xs sm:text-sm text-[#64748B]">
         Showing <span className="font-semibold text-[#0F172A]">{startItem}</span> to{' '}
         <span className="font-semibold text-[#0F172A]">{endItem}</span> of{' '}
-        <span className="font-semibold text-[#0F172A]">{totalItems}</span> students
+        <span className="font-semibold text-[#0F172A]">{totalItems}</span> {itemLabel}
       </div>
 
       <div className="flex items-center gap-1.5">

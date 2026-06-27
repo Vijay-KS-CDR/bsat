@@ -4,14 +4,12 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext';
 import AppRoutes from './routes/AppRoutes';
-import Navbar from './components/Navbar';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300">
-          {/* <Navbar /> */}
           <main>
             <AppRoutes />
           </main>

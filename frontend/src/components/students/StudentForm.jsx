@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, BookOpen, Users, X, Save, AlertCircle } from 'lucide-react';
 
-const StudentForm = ({ isOpen, onClose, onSave, initialData }) => {
+const StudentForm = ({ isOpen, onClose, onSave, initialData, apiErrors }) => {
   const isEditing = Boolean(initialData);
 
   const [formData, setFormData] = useState({
@@ -43,6 +43,12 @@ const StudentForm = ({ isOpen, onClose, onSave, initialData }) => {
     }
     setErrors({});
   }, [initialData, isOpen]);
+
+  useEffect(() => {
+    if (apiErrors && Object.keys(apiErrors).length > 0) {
+      setErrors(prev => ({ ...prev, ...apiErrors }));
+    }
+  }, [apiErrors]);
 
   if (!isOpen) return null;
 
@@ -135,8 +141,9 @@ const StudentForm = ({ isOpen, onClose, onSave, initialData }) => {
                     type="text"
                     value={formData.admissionNumber}
                     onChange={(e) => handleChange('admissionNumber', e.target.value)}
-                    className="w-full px-4 py-2.5 bg-[#F8FAFC] font-mono border border-[#E2E8F0] rounded-[16px] text-sm focus:outline-none"
+                    className={`w-full px-4 py-2.5 bg-[#F8FAFC] font-mono border ${errors.admissionNumber ? 'border-[#DC2626] ring-1 ring-[#DC2626]' : 'border-[#E2E8F0]'} rounded-[16px] text-sm focus:outline-none`}
                   />
+                  {errors.admissionNumber && <p className="text-xs text-[#DC2626] mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.admissionNumber}</p>}
                 </div>
 
                 <div>
@@ -157,8 +164,9 @@ const StudentForm = ({ isOpen, onClose, onSave, initialData }) => {
                     type="text"
                     value={formData.temporaryPassword}
                     onChange={(e) => handleChange('temporaryPassword', e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white border border-[#E2E8F0] font-mono rounded-[16px] text-sm focus:outline-none focus:border-[#2563EB]"
+                    className={`w-full px-4 py-2.5 bg-white border ${errors.temporaryPassword ? 'border-[#DC2626] ring-1 ring-[#DC2626]' : 'border-[#E2E8F0]'} font-mono rounded-[16px] text-sm focus:outline-none focus:border-[#2563EB]`}
                   />
+                  {errors.temporaryPassword && <p className="text-xs text-[#DC2626] mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.temporaryPassword}</p>}
                 </div>
 
                 <div>

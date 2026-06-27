@@ -7,6 +7,8 @@ import Dashboard from '../pages/Dashboard';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import StudentsPage from '../pages/StudentsPage';
+import TeachersPage from '../pages/TeachersPage';
+import SubjectsPage from '../pages/SubjectsPage';
 
 const AppRoutes = () => {
   return (
@@ -21,6 +23,74 @@ const AppRoutes = () => {
         element={
           <DashboardLayout>
             <StudentsPage />
+          </DashboardLayout>
+        } 
+      />
+
+      {/* Module 3: Teacher Management (Direct preview enabled) */}
+      <Route 
+        path="/teachers" 
+        element={
+          <DashboardLayout>
+            <TeachersPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/teachers/add" 
+        element={
+          <DashboardLayout>
+            <TeachersPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/teachers/:id" 
+        element={
+          <DashboardLayout>
+            <TeachersPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/teachers/:id/edit" 
+        element={
+          <DashboardLayout>
+            <TeachersPage />
+          </DashboardLayout>
+        } 
+      />
+
+      {/* Module 4: Subject Management (Direct preview enabled) */}
+      <Route 
+        path="/subjects" 
+        element={
+          <DashboardLayout>
+            <SubjectsPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/subjects/add" 
+        element={
+          <DashboardLayout>
+            <SubjectsPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/subjects/:id" 
+        element={
+          <DashboardLayout>
+            <SubjectsPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/subjects/:id/edit" 
+        element={
+          <DashboardLayout>
+            <SubjectsPage />
           </DashboardLayout>
         } 
       />

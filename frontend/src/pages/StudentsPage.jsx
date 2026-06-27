@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Users, UserCheck, Sparkles, UserPlus, Filter, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 
-import mockStudents from '../mock/studentsData.json';
 import StatsCard from '../components/dashboard/StatsCard';
 import PageHeader from '../components/dashboard/PageHeader';
 import FilterDropdown from '../components/dashboard/FilterDropdown';
@@ -13,6 +13,14 @@ import StudentTable from '../components/students/StudentTable';
 import StudentForm from '../components/students/StudentForm';
 import StudentDetailsModal from '../components/students/StudentDetailsModal';
 import DeleteModal from '../components/dashboard/DeleteModal';
+
+import {
+  getStudents,
+  createStudent,
+  updateStudent,
+  deleteStudent,
+  updateStudentStatus
+} from '../api/studentApi';
 
 const StudentsPage = ({ globalSearch = '' }) => {
   const [students, setStudents] = useState([]);
@@ -42,14 +50,25 @@ const StudentsPage = ({ globalSearch = '' }) => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deletingStudent, setDeletingStudent] = useState(null);
 
-  // Load initial mock JSON
-  useEffect(() => {
+  // API validation errors state
+  const [formErrors, setFormErrors] = useState({});
+
+  // Fetch student data from backend
+  const loadStudents = async () => {
     setIsLoading(true);
-    const timer = setTimeout(() => {
-      setStudents(mockStudents);
+    try {
+      const data = await getStudents();
+      setStudents(data);
+    } catch (error) {
+      console.error('Failed to load students:', error);
+      toast.error('Failed to load students from server.');
+    } finally {
       setIsLoading(false);
-    }, 600); // Simulate network load
-    return () => clearTimeout(timer);
+    }
+  };
+
+  useEffect(() => {
+    loadStudents();
   }, []);
 
   // Sync global topnav search with local search
@@ -119,29 +138,106 @@ const StudentsPage = ({ globalSearch = '' }) => {
     setCurrentPage(1);
   };
 
-  // CRUD Actions
-  const handleSaveStudent = (formData) => {
-    if (editingStudent) {
-      setStudents(prev => prev.map(s => s.id === editingStudent.id ? { ...s, ...formData } : s));
-    } else {
-      const newRecord = {
-        ...formData,
-        id: String(Date.now()),
-        createdDate: new Date().toISOString().split('T')[0],
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
-      };
-      setStudents(prev => [newRecord, ...prev]);
-    }
-    setIsFormOpen(false);
+  // Helper to open form modals resetting validation errors
+  const openAddForm = () => {
+    setFormErrors({});
     setEditingStudent(null);
+    setIsFormOpen(true);
   };
 
-  const handleConfirmDelete = () => {
+  const openEditForm = (st) => {
+    setFormErrors({});
+    setEditingStudent(st);
+    setIsFormOpen(true);
+  };
+
+  // Utility to parse backend API validation and business errors
+  const handleApiError = (error, setFieldErrors, defaultMessage) => {
+    console.error("API error details:", {
+      statusCode: error.response?.status,
+      responseBody: error.response?.data,
+      errorMessage: error.message
+    });
+
+    const responseData = error.response?.data;
+    if (!responseData) {
+      toast.error(error.message || defaultMessage);
+      return;
+    }
+
+    // 1. Spring Validation Field Errors
+    if (responseData.errors && Array.isArray(responseData.errors)) {
+      const fieldErrors = {};
+      responseData.errors.forEach(err => {
+        const field = err.field === 'className' ? 'class' : (err.field === 'dateOfBirth' ? 'dob' : err.field);
+        fieldErrors[field] = err.defaultMessage;
+      });
+      setFieldErrors(fieldErrors);
+      toast.error("Please fix the validation errors below.");
+      return;
+    }
+
+    // 2. Exception messages (String responses from controllers)
+    if (typeof responseData === 'string') {
+      if (responseData.toLowerCase().includes("admission number")) {
+        setFieldErrors({ admissionNumber: responseData });
+      } else if (responseData.toLowerCase().includes("login id")) {
+        setFieldErrors({ loginId: responseData });
+      }
+      toast.error(responseData);
+      return;
+    }
+
+    // 3. Fallback General Message
+    const generalMsg = responseData.message || defaultMessage;
+    toast.error(generalMsg);
+  };
+
+  // CRUD Actions
+  const handleSaveStudent = async (formData) => {
+    setFormErrors({});
+    try {
+      if (editingStudent) {
+        const updated = await updateStudent(editingStudent.id, formData);
+        setStudents(prev => prev.map(s => s.id === editingStudent.id ? updated : s));
+        toast.success('Student updated successfully');
+      } else {
+        const created = await createStudent(formData);
+        setStudents(prev => [created, ...prev]);
+        toast.success('Student created successfully');
+      }
+      setIsFormOpen(false);
+      setEditingStudent(null);
+    } catch (error) {
+      handleApiError(error, setFormErrors, editingStudent ? 'Failed to update student' : 'Failed to save student');
+    }
+  };
+
+  const handleConfirmDelete = async () => {
     if (deletingStudent) {
-      setStudents(prev => prev.filter(s => s.id !== deletingStudent.id));
+      try {
+        await deleteStudent(deletingStudent.id);
+        setStudents(prev => prev.filter(s => s.id !== deletingStudent.id));
+        toast.success('Student deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete student:', error);
+        toast.error(error.response?.data || error.message || 'Failed to delete student');
+      }
     }
     setIsDeleteOpen(false);
     setDeletingStudent(null);
+  };
+
+  const handleToggleStatus = async (student) => {
+    const newStatus = student.status === 'Active' ? 'Inactive' : 'Active';
+    try {
+      const updated = await updateStudentStatus(student.id, newStatus);
+      setStudents(prev => prev.map(s => s.id === student.id ? updated : s));
+      toast.success(`Status updated successfully to ${newStatus}`);
+    } catch (error) {
+      console.error('Failed to toggle status:', error);
+      toast.error(error.response?.data || error.message || 'Failed to update status');
+    }
   };
 
   if (isLoading) {
@@ -161,7 +257,7 @@ const StudentsPage = ({ globalSearch = '' }) => {
         subtitle="Manage student enrollments, class allocations, parent contact details, and account status."
         actionButton={
           <button
-            onClick={() => { setEditingStudent(null); setIsFormOpen(true); }}
+            onClick={openAddForm}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2563EB] text-white font-semibold text-sm rounded-[16px] hover:bg-[#1D4ED8] transition-all shadow-sm hover:shadow-md cursor-pointer"
           >
             <UserPlus size={18} /> Add Student
@@ -248,9 +344,10 @@ const StudentsPage = ({ globalSearch = '' }) => {
         sortDir={sortDir}
         onSort={handleSort}
         onView={(st) => { setViewingStudent(st); setIsDetailsOpen(true); }}
-        onEdit={(st) => { setEditingStudent(st); setIsFormOpen(true); }}
+        onEdit={openEditForm}
         onDelete={(st) => { setDeletingStudent(st); setIsDeleteOpen(true); }}
-        onAddStudent={() => { setEditingStudent(null); setIsFormOpen(true); }}
+        onAddStudent={openAddForm}
+        onToggleStatus={handleToggleStatus}
       />
 
       {/* Table Pagination Controls */}
@@ -268,13 +365,14 @@ const StudentsPage = ({ globalSearch = '' }) => {
         onClose={() => { setIsFormOpen(false); setEditingStudent(null); }}
         onSave={handleSaveStudent}
         initialData={editingStudent}
+        apiErrors={formErrors}
       />
 
       <StudentDetailsModal
         student={viewingStudent}
         isOpen={isDetailsOpen}
         onClose={() => { setIsDetailsOpen(false); setViewingStudent(null); }}
-        onEdit={(st) => { setEditingStudent(st); setIsFormOpen(true); }}
+        onEdit={openEditForm}
       />
 
       <DeleteModal
