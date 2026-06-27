@@ -9,6 +9,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import StudentsPage from '../pages/StudentsPage';
 import TeachersPage from '../pages/TeachersPage';
 import SubjectsPage from '../pages/SubjectsPage';
+import QuestionsPage from '../pages/QuestionsPage';
 
 const AppRoutes = () => {
   return (
@@ -91,6 +92,40 @@ const AppRoutes = () => {
         element={
           <DashboardLayout>
             <SubjectsPage />
+          </DashboardLayout>
+        } 
+      />
+
+      {/* Module 5: Question Bank Frontend */}
+      <Route 
+        path="/question-bank" 
+        element={
+          <DashboardLayout>
+            <QuestionsPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/question-bank/add" 
+        element={
+          <DashboardLayout>
+            <QuestionsPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/question-bank/:id" 
+        element={
+          <DashboardLayout>
+            <QuestionsPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/question-bank/:id/edit" 
+        element={
+          <DashboardLayout>
+            <QuestionsPage />
           </DashboardLayout>
         } 
       />

@@ -23,10 +23,11 @@ public class QuestionController {
     @PostMapping
     public ResponseEntity<?> createQuestion(@Valid @RequestBody CreateQuestionRequest request) {
         try {
-            questionService.createQuestion(request);
-            return new ResponseEntity<>(ApiResponse.builder()
+            QuestionResponse created = questionService.createQuestion(request);
+            return new ResponseEntity<>(ApiResponse.<QuestionResponse>builder()
                     .success(true)
                     .message("Question created successfully")
+                    .data(created)
                     .build(), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
@@ -68,10 +69,11 @@ public class QuestionController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateQuestion(@PathVariable Long id, @Valid @RequestBody UpdateQuestionRequest request) {
         try {
-            questionService.updateQuestion(id, request);
-            return ResponseEntity.ok(ApiResponse.builder()
+            QuestionResponse updated = questionService.updateQuestion(id, request);
+            return ResponseEntity.ok(ApiResponse.<QuestionResponse>builder()
                     .success(true)
                     .message("Question updated successfully")
+                    .data(updated)
                     .build());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
@@ -106,10 +108,11 @@ public class QuestionController {
             if (status == null) {
                 throw new IllegalArgumentException("Status value is required");
             }
-            questionService.updateQuestionStatus(id, status);
-            return ResponseEntity.ok(ApiResponse.builder()
+            QuestionResponse updated = questionService.updateQuestionStatus(id, status);
+            return ResponseEntity.ok(ApiResponse.<QuestionResponse>builder()
                     .success(true)
                     .message("Question status updated")
+                    .data(updated)
                     .build());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()

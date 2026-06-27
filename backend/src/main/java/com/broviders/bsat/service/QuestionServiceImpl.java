@@ -104,6 +104,15 @@ public class QuestionServiceImpl implements QuestionService {
             question.setStatus(upperStatus);
         }
 
+        if (request.getQuestionText() != null) {
+            question.setQuestionText(request.getQuestionText());
+        }
+        if (request.getOptionA() != null) question.setOptionA(request.getOptionA());
+        if (request.getOptionB() != null) question.setOptionB(request.getOptionB());
+        if (request.getOptionC() != null) question.setOptionC(request.getOptionC());
+        if (request.getOptionD() != null) question.setOptionD(request.getOptionD());
+        if (request.getCorrectAnswer() != null) question.setCorrectAnswer(request.getCorrectAnswer());
+
         Question saved = questionRepository.save(question);
         return mapToDetailedResponse(saved);
     }

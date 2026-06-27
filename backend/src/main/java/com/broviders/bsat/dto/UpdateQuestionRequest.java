@@ -20,4 +20,13 @@ public class UpdateQuestionRequest {
     private Integer marks;
 
     private String status;
+
+    @Size(min = 10, max = 5000, message = "Question text must be between 10 and 5000 characters")
+    private String questionText;
+
+    private String optionA;
+    private String optionB;
+    private String optionC;
+    private String optionD;
+    private String correctAnswer;
 }

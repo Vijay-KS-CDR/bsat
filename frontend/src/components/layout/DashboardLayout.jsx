@@ -38,6 +38,7 @@ const DashboardLayout = ({ children }) => {
     const path = window.location.pathname;
     if (path.startsWith('/teachers')) return 'Teachers';
     if (path.startsWith('/subjects')) return 'Subjects';
+    if (path.startsWith('/question-bank')) return 'Question Bank';
     if (path.startsWith('/dashboard')) return 'Dashboard';
     return 'Students';
   });
@@ -51,6 +52,8 @@ const DashboardLayout = ({ children }) => {
       setActivePage('Teachers');
     } else if (path.startsWith('/subjects')) {
       setActivePage('Subjects');
+    } else if (path.startsWith('/question-bank')) {
+      setActivePage('Question Bank');
     } else if (path.startsWith('/dashboard')) {
       setActivePage('Dashboard');
     } else if (path.startsWith('/students') || path === '/') {
@@ -63,6 +66,7 @@ const DashboardLayout = ({ children }) => {
     if (page === 'Students') navigate('/students');
     else if (page === 'Teachers') navigate('/teachers');
     else if (page === 'Subjects') navigate('/subjects');
+    else if (page === 'Question Bank') navigate('/question-bank');
     else if (page === 'Dashboard') navigate('/dashboard');
   };
 
@@ -71,6 +75,7 @@ const DashboardLayout = ({ children }) => {
       case 'Students':
       case 'Teachers':
       case 'Subjects':
+      case 'Question Bank':
         return React.isValidElement(children) 
           ? React.cloneElement(children, { activePage, globalSearch, onNavigate: handleNavigate })
           : children;
