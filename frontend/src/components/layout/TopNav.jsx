@@ -1,8 +1,17 @@
 import React from 'react';
 import { Bell, ChevronRight, User } from 'lucide-react';
 import SearchBar from '../dashboard/SearchBar';
+import { useAuth } from '../../context/AuthContext';
 
 const TopNav = ({ activePage = 'Students', searchQuery, onSearchChange }) => {
+  const { user } = useAuth();
+  const userName = user?.name || 'Administrator';
+  const rawRole = user?.role || 'ADMIN';
+  const userRole = rawRole === 'TEACHER' ? 'Teacher' 
+                 : rawRole === 'ADMIN' ? 'Administrator' 
+                 : rawRole === 'STUDENT' ? 'Student' 
+                 : rawRole;
+
   return (
     <header className="h-16 bg-white border-b border-[#E2E8F0] px-6 flex items-center justify-between sticky top-0 z-20 shadow-2xs">
       {/* Breadcrumb Area */}
@@ -42,9 +51,9 @@ const TopNav = ({ activePage = 'Students', searchQuery, onSearchChange }) => {
           </div>
           <div className="hidden sm:block text-left">
             <h4 className="text-sm font-bold text-[#0F172A] leading-tight group-hover:text-[#2563EB] transition-colors">
-              Administrator
+              {userName}
             </h4>
-            <p className="text-xs text-[#64748B]">Current User</p>
+            <p className="text-xs text-[#64748B]">{userRole}</p>
           </div>
         </div>
       </div>

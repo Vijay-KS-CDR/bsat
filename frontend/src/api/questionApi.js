@@ -14,7 +14,7 @@ export const mapBackendToFrontend = (b) => {
     subjectId: Number(b.subjectId || 1),
     subject: b.subjectName || b.subject || '',
     topic: b.topic || '',
-    questionType: b.questionType || 'MCQ',
+    questionType: b.questionType || 'MCQ_SINGLE',
     difficulty: diff,
     questionText: b.questionText || '',
     options: {
@@ -32,18 +32,18 @@ export const mapBackendToFrontend = (b) => {
 
 // Convert frontend format to backend create format (CreateQuestionRequest)
 export const mapFrontendToBackendCreate = (f) => {
-  const isMcq = f.questionType === 'MCQ';
+  const isMcq = f.questionType === 'MCQ_SINGLE';
   return {
     subjectId: Number(f.subjectId || 1),
     topic: f.topic || '',
-    questionType: f.questionType || 'MCQ',
+    questionType: f.questionType || 'MCQ_SINGLE',
     difficulty: f.difficulty ? f.difficulty.toUpperCase() : 'MEDIUM',
     questionText: f.questionText || '',
     optionA: isMcq ? (f.options?.A || f.optionA || '') : null,
     optionB: isMcq ? (f.options?.B || f.optionB || '') : null,
     optionC: isMcq ? (f.options?.C || f.optionC || '') : null,
     optionD: isMcq ? (f.options?.D || f.optionD || '') : null,
-    correctAnswer: f.questionType === 'DESCRIPTIVE' ? null : (f.correctAnswer || ''),
+    correctAnswer: f.correctAnswer || '',
     marks: Number(f.marks || 1),
     status: f.status === 'Active' || f.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE'
   };
@@ -51,7 +51,7 @@ export const mapFrontendToBackendCreate = (f) => {
 
 // Convert frontend format to backend update format (UpdateQuestionRequest)
 export const mapFrontendToBackendUpdate = (f) => {
-  const isMcq = f.questionType === 'MCQ';
+  const isMcq = f.questionType === 'MCQ_SINGLE';
   return {
     topic: f.topic || '',
     difficulty: f.difficulty ? f.difficulty.toUpperCase() : 'MEDIUM',
@@ -62,7 +62,7 @@ export const mapFrontendToBackendUpdate = (f) => {
     optionB: isMcq ? (f.options?.B || f.optionB || '') : null,
     optionC: isMcq ? (f.options?.C || f.optionC || '') : null,
     optionD: isMcq ? (f.options?.D || f.optionD || '') : null,
-    correctAnswer: f.questionType === 'DESCRIPTIVE' ? null : (f.correctAnswer || '')
+    correctAnswer: f.correctAnswer || ''
   };
 };
 

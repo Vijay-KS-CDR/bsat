@@ -145,21 +145,22 @@ public class QuestionServiceImpl implements QuestionService {
     private void validateQuestionDetails(CreateQuestionRequest request) {
         QuestionType type = request.getQuestionType();
 
-        if (type == QuestionType.MCQ) {
-            if (isBlank(request.getOptionA())) throw new IllegalArgumentException("Option A is required for MCQ");
-            if (isBlank(request.getOptionB())) throw new IllegalArgumentException("Option B is required for MCQ");
-            if (isBlank(request.getOptionC())) throw new IllegalArgumentException("Option C is required for MCQ");
-            if (isBlank(request.getOptionD())) throw new IllegalArgumentException("Option D is required for MCQ");
-            if (isBlank(request.getCorrectAnswer())) throw new IllegalArgumentException("Correct answer is required for MCQ");
+        if (type == QuestionType.MCQ_SINGLE) {
+            if (isBlank(request.getOptionA())) throw new IllegalArgumentException("Option A is required for MCQ_SINGLE");
+            if (isBlank(request.getOptionB())) throw new IllegalArgumentException("Option B is required for MCQ_SINGLE");
+            if (isBlank(request.getOptionC())) throw new IllegalArgumentException("Option C is required for MCQ_SINGLE");
+            if (isBlank(request.getOptionD())) throw new IllegalArgumentException("Option D is required for MCQ_SINGLE");
+            if (isBlank(request.getCorrectAnswer())) throw new IllegalArgumentException("Correct answer is required for MCQ_SINGLE");
             if (!request.getCorrectAnswer().toUpperCase().matches("^[A-D]$")) {
                 throw new IllegalArgumentException("Correct answer must be A, B, C, or D");
             }
-        } else if (type == QuestionType.ONE_WORD || type == QuestionType.NUMERICAL) {
+        } else if (type == QuestionType.NUMERICAL) {
             if (isBlank(request.getCorrectAnswer())) {
-                throw new IllegalArgumentException("Correct answer is required");
+                throw new IllegalArgumentException("Correct answer is required for NUMERICAL");
             }
+        } else {
+            throw new IllegalArgumentException("Unsupported question type: " + type);
         }
-        // DESCRIPTIVE types do not require a correct answer
     }
 
     private boolean isBlank(String s) {

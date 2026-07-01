@@ -2,7 +2,17 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
 
-const DeleteModal = ({ isOpen, onClose, onConfirm, studentName }) => {
+const DeleteModal = ({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  studentName,
+  title = studentName ? "Delete Student Record" : "Delete Record",
+  description = studentName 
+    ? `Are you sure you want to delete ${studentName}? This action cannot be undone and will permanently remove their academic profile and exam history.` 
+    : "Are you sure you want to delete this record? This action cannot be undone.",
+  confirmText = studentName ? "Delete Student" : "Delete"
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -20,9 +30,9 @@ const DeleteModal = ({ isOpen, onClose, onConfirm, studentName }) => {
               <AlertTriangle size={24} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[#0F172A]">Delete Student Record</h3>
-              <p className="text-sm text-[#64748B] mt-2 leading-relaxed">
-                Are you sure you want to delete <strong className="text-[#0F172A]">{studentName || 'this student'}</strong>? This action cannot be undone and will permanently remove their academic profile and exam history.
+              <h3 className="text-lg font-bold text-[#0F172A]">{title}</h3>
+              <p className="text-sm text-[#64748B] mt-2 leading-relaxed whitespace-pre-wrap">
+                {description}
               </p>
             </div>
           </div>
@@ -31,16 +41,16 @@ const DeleteModal = ({ isOpen, onClose, onConfirm, studentName }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-sm font-semibold text-[#64748B] bg-[#F8FAFC] hover:bg-slate-200/60 transition-colors"
+              className="px-4 py-2 rounded-xl text-sm font-semibold text-[#64748B] bg-[#F8FAFC] hover:bg-slate-200/60 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={onConfirm}
-              className="px-5 py-2 rounded-xl text-sm font-semibold text-white bg-[#DC2626] hover:bg-[#b91c1c] shadow-xs hover:shadow-md transition-all"
+              className="px-5 py-2 rounded-xl text-sm font-semibold text-white bg-[#DC2626] hover:bg-[#b91c1c] shadow-xs hover:shadow-md transition-all cursor-pointer"
             >
-              Delete Student
+              {confirmText}
             </button>
           </div>
         </motion.div>

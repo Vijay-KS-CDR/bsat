@@ -21,7 +21,7 @@ public class UpdateQuestionRequest {
 
     private String status;
 
-    @Size(min = 10, max = 5000, message = "Question text must be between 10 and 5000 characters")
+    @Size(min = 2, max = 5000, message = "Question text must be between 2 and 5000 characters")
     private String questionText;
 
     private String optionA;

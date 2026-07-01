@@ -49,6 +49,28 @@ public class AuthResponse {
     private String name;
 
     /**
+     * The JWT access token.
+     */
+    private String token;
+
+    /**
+     * Nested user info object matching requested layout.
+     */
+    private UserInfo user;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class UserInfo {
+        private Long id;
+        private String loginId;
+        private String role;
+        private String name;
+    }
+
+    /**
      * 4-argument constructor to prevent breaking the working Register API.
      *
      * @param message registration status message
@@ -58,8 +80,14 @@ public class AuthResponse {
      */
     public AuthResponse(String message, String loginId, String role, String name) {
         this.message = message;
+        this.success = true;
         this.loginId = loginId;
         this.role = role;
         this.name = name;
+        this.user = UserInfo.builder()
+                .loginId(loginId)
+                .role(role)
+                .name(name)
+                .build();
     }
 }

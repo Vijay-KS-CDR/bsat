@@ -45,7 +45,7 @@ class QuestionControllerTest {
                 .subjectId(10L)
                 .subjectName("Mathematics")
                 .topic("Algebra")
-                .questionType(QuestionType.MCQ)
+                .questionType(QuestionType.MCQ_SINGLE)
                 .difficulty(Difficulty.EASY)
                 .questionText("What is 2 + 2?")
                 .optionA("1")
@@ -63,7 +63,7 @@ class QuestionControllerTest {
         CreateQuestionRequest request = new CreateQuestionRequest();
         request.setSubjectId(10L);
         request.setTopic("Algebra");
-        request.setQuestionType(QuestionType.MCQ);
+        request.setQuestionType(QuestionType.MCQ_SINGLE);
         request.setDifficulty(Difficulty.EASY);
         request.setQuestionText("What is 2 + 2?");
         request.setOptionA("1");

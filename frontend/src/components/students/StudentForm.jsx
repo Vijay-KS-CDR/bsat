@@ -73,7 +73,10 @@ const StudentForm = ({ isOpen, onClose, onSave, initialData, apiErrors }) => {
     if (!formData.temporaryPassword.trim()) newErr.temporaryPassword = 'Password is required';
     if (!formData.dob) newErr.dob = 'Date of birth is required';
     if (!formData.parentName.trim()) newErr.parentName = 'Parent name is required';
-    if (!formData.parentPhone.trim() || formData.parentPhone.length < 8) newErr.parentPhone = 'Valid parent phone required';
+    const cleanPhoneDigits = (formData.parentPhone || '').replace(/\D/g, '').slice(-10);
+    if (cleanPhoneDigits.length !== 10) {
+      newErr.parentPhone = 'Parent phone must contain exactly 10 digits';
+    }
     if (!formData.address.trim()) newErr.address = 'Residential address is required';
 
     setErrors(newErr);
@@ -207,7 +210,7 @@ const StudentForm = ({ isOpen, onClose, onSave, initialData, apiErrors }) => {
                     onChange={(e) => handleChange('class', e.target.value)}
                     className="w-full px-4 py-2.5 bg-white border border-[#E2E8F0] rounded-[16px] text-sm focus:outline-none focus:border-[#2563EB]"
                   >
-                    {['9', '10', '11', '12'].map(c => <option key={c} value={c}>Class {c}</option>)}
+                    {['6', '7', '8', '9', '10', '11', '12'].map(c => <option key={c} value={c}>Class {c}</option>)}
                   </select>
                 </div>
 

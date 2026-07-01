@@ -16,7 +16,7 @@ import LoadingSkeleton from '../components/dashboard/LoadingSkeleton';
 import QuestionTable from '../components/questions/QuestionTable';
 import QuestionForm from '../components/questions/QuestionForm';
 import QuestionDetails from '../components/questions/QuestionDetails';
-import DeleteModal from '../components/questions/DeleteModal';
+import DeleteModal from '../components/dashboard/DeleteModal';
 
 // API adapter
 import {
@@ -28,7 +28,7 @@ import {
   updateQuestionStatus
 } from '../api/questionApi';
 
-const QuestionsPage = ({ globalSearch = '', onNavigate }) => {
+const QuestionsPage = ({ globalSearch = '' }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
@@ -116,9 +116,9 @@ const QuestionsPage = ({ globalSearch = '', onNavigate }) => {
   const stats = useMemo(() => {
     const total = questions.length;
     const active = questions.filter(q => q.status === 'Active').length;
-    const mcq = questions.filter(q => q.questionType === 'MCQ').length;
-    const descriptive = questions.filter(q => q.questionType === 'DESCRIPTIVE').length;
-    return { total, active, mcq, descriptive };
+    const mcq = questions.filter(q => q.questionType === 'MCQ_SINGLE').length;
+    const numerical = questions.filter(q => q.questionType === 'NUMERICAL').length;
+    return { total, active, mcq, numerical };
   }, [questions]);
 
   // Filtered and sorted questions
@@ -188,7 +188,26 @@ const QuestionsPage = ({ globalSearch = '', onNavigate }) => {
       navigate('/question-bank');
     } catch (error) {
       console.error('Save error:', error);
-      toast.error(error.message || 'Failed to save question');
+      if (error.response && error.response.data) {
+        const apiData = error.response.data;
+        if (apiData.errors) {
+          const mappedErrors = {};
+          Object.keys(apiData.errors).forEach((key) => {
+            if (key === 'optionA') mappedErrors.option_A = apiData.errors.optionA;
+            else if (key === 'optionB') mappedErrors.option_B = apiData.errors.optionB;
+            else if (key === 'optionC') mappedErrors.option_C = apiData.errors.optionC;
+            else if (key === 'optionD') mappedErrors.option_D = apiData.errors.optionD;
+            else mappedErrors[key] = apiData.errors[key];
+          });
+          setFormErrors(mappedErrors);
+        } else if (apiData.message) {
+          toast.error(apiData.message);
+        } else {
+          toast.error('Failed to save question');
+        }
+      } else {
+        toast.error(error.message || 'Failed to save question');
+      }
     }
   };
 
@@ -336,15 +355,15 @@ const QuestionsPage = ({ globalSearch = '', onNavigate }) => {
           icon={Layers}
           title="MCQ Questions"
           value={stats.mcq}
-          description="Multiple choice formats"
+          description="Single correct choice"
           colorClass="text-[#8B5CF6]"
           bgClass="bg-[#8B5CF6]/10"
         />
         <StatsCard
           icon={AlignLeft}
-          title="Descriptive Questions"
-          value={stats.descriptive}
-          description="Long-form essay format"
+          title="Numerical Questions"
+          value={stats.numerical}
+          description="Numeric response type"
           colorClass="text-[#F59E0B]"
           bgClass="bg-[#F59E0B]/10"
         />
@@ -364,7 +383,7 @@ const QuestionsPage = ({ globalSearch = '', onNavigate }) => {
           />
           <FilterDropdown
             label="Types"
-            options={['MCQ', 'ONE_WORD', 'NUMERICAL', 'DESCRIPTIVE']}
+            options={['MCQ_SINGLE', 'NUMERICAL']}
             selectedValue={typeFilter}
             onChange={(v) => { setTypeFilter(v); setCurrentPage(1); }}
           />
@@ -421,7 +440,9 @@ const QuestionsPage = ({ globalSearch = '', onNavigate }) => {
         isOpen={isDeleteOpen}
         onClose={() => { setIsDeleteOpen(false); setDeletingQuestion(null); }}
         onConfirm={handleConfirmDelete}
-        questionText={deletingQuestion?.questionText}
+        title="Delete Question Record"
+        description={deletingQuestion ? `Are you sure you want to delete this question?\n\n"${deletingQuestion.questionText}"` : "Are you sure you want to delete this question?"}
+        confirmText="Delete"
       />
     </motion.div>
   );

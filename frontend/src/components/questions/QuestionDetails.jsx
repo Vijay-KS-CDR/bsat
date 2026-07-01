@@ -8,10 +8,8 @@ const QuestionDetails = ({ question, onBack, onEdit }) => {
 
   const getTypeLabel = (type) => {
     switch (type) {
-      case 'MCQ': return 'Multiple Choice Question';
-      case 'ONE_WORD': return 'One Word Answer';
+      case 'MCQ_SINGLE': return 'Multiple Choice Question';
       case 'NUMERICAL': return 'Numerical Value Answer';
-      case 'DESCRIPTIVE': return 'Descriptive Question';
       default: return type || 'N/A';
     }
   };
@@ -127,8 +125,8 @@ const QuestionDetails = ({ question, onBack, onEdit }) => {
             </p>
           </div>
 
-          {/* Options Section if MCQ */}
-          {question.questionType === 'MCQ' && question.options && (
+          {/* Options Section if MCQ_SINGLE */}
+          {question.questionType === 'MCQ_SINGLE' && question.options && (
             <div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-2xs space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[#64748B]">Multiple Choice Options</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -167,8 +165,8 @@ const QuestionDetails = ({ question, onBack, onEdit }) => {
             </div>
           )}
 
-          {/* Correct Answer Section for ONE_WORD or NUMERICAL */}
-          {(question.questionType === 'ONE_WORD' || question.questionType === 'NUMERICAL') && (
+          {/* Correct Answer Section for NUMERICAL */}
+          {question.questionType === 'NUMERICAL' && (
             <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-200 shadow-2xs flex items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
                 <div className="p-3 bg-emerald-600 text-white rounded-xl shrink-0">
@@ -176,23 +174,12 @@ const QuestionDetails = ({ question, onBack, onEdit }) => {
                 </div>
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 block">
-                    Expected {question.questionType === 'NUMERICAL' ? 'Numerical' : 'One Word'} Correct Answer
+                    Expected Numerical Correct Answer
                   </span>
                   <span className="text-xl font-extrabold text-emerald-950 font-mono mt-0.5 block">
                     {question.correctAnswer}
                   </span>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Descriptive Note */}
-          {question.questionType === 'DESCRIPTIVE' && (
-            <div className="bg-violet-50 p-6 rounded-2xl border border-violet-200 shadow-2xs flex items-center gap-4 text-violet-900">
-              <HelpCircle size={24} className="text-violet-600 shrink-0" />
-              <div className="text-sm leading-relaxed">
-                <strong className="font-bold block mb-0.5">Descriptive Evaluation Rule</strong>
-                This question requires manual grading by the teacher or evaluator during assessment scoring. No automated exact-match answer key is assigned.
               </div>
             </div>
           )}

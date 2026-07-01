@@ -17,6 +17,14 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  React.useEffect(() => {
+    const authError = localStorage.getItem('authError');
+    if (authError) {
+      toast.error(authError);
+      localStorage.removeItem('authError');
+    }
+  }, []);
+
   const from = location.state?.from?.pathname || '/dashboard';
 
   const validate = () => {
@@ -48,15 +56,17 @@ const Login = () => {
 
     setIsSubmitting(true);
     try {
-      console.log("Outgoing login payload:", formData);
       const response = await loginUser(formData);
-      console.log("Login successful response:", response);
       if (response.success) {
-        // The backend does not generate a real token since security permits all requests.
-        // We supply a mock token to satisfy frontend authentication route checks.
-        login(response.token || 'mock-jwt-token', response);
+        const userObj = response.user || response;
+        login(response.token, userObj);
         toast.success('Welcome back!');
-        navigate(from, { replace: true });
+        
+        let target = location.state?.from?.pathname;
+        if (!target || target === '/' || target === '/login') {
+          target = userObj.role === 'STUDENT' ? '/student/dashboard' : '/dashboard';
+        }
+        navigate(target, { replace: true });
       }
     } catch (error) {
       console.error("Login failed full error details:", {

@@ -4,12 +4,17 @@ import com.broviders.bsat.dto.AuthResponse;
 import com.broviders.bsat.dto.LoginRequest;
 import com.broviders.bsat.dto.RegisterRequest;
 import com.broviders.bsat.entity.Role;
+import com.broviders.bsat.entity.Student;
 import com.broviders.bsat.entity.User;
 import com.broviders.bsat.repository.RoleRepository;
+import com.broviders.bsat.repository.StudentRepository;
 import com.broviders.bsat.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import com.broviders.bsat.security.JwtUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 /**
  * Service class that contains business logic for authentication.
@@ -21,7 +26,9 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     /**
      * Registers a new user in the system.
@@ -54,7 +61,29 @@ public class AuthService {
         // 4. Save the user to the database
         User savedUser = userRepository.save(user);
 
-        // 5. Construct and return a user-friendly AuthResponse
+        // 5. If the user is a STUDENT, auto-create a corresponding Student record so exam flow works
+        if ("STUDENT".equalsIgnoreCase(request.getRole())) {
+            String admissionNumber = String.format("ADM-%d-%04d",
+                    LocalDate.now().getYear(), savedUser.getId());
+            // Guard against duplicate admission number on re-registration edge cases
+            if (!studentRepository.existsByAdmissionNumber(admissionNumber)) {
+                Student student = Student.builder()
+                        .user(savedUser)
+                        .admissionNumber(admissionNumber)
+                        .className("6")
+                        .section("A")
+                        .gender("UNSPECIFIED")
+                        .dateOfBirth(LocalDate.of(2005, 1, 1))
+                        .parentName("Not Provided")
+                        .parentPhone("0000000000")
+                        .address("Not Provided")
+                        .status("ACTIVE")
+                        .build();
+                studentRepository.save(student);
+            }
+        }
+
+        // 6. Construct and return a user-friendly AuthResponse
         return new AuthResponse(
                 "User registered successfully",
                 savedUser.getLoginId(),
@@ -81,13 +110,24 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid login ID or password");
         }
 
-        // 3. Return a successful AuthResponse containing the required fields
+        // 3. Generate JWT token
+        String token = jwtUtils.generateToken(user.getId(), user.getLoginId(), user.getRole().getName());
+
+        // 4. Return a successful AuthResponse containing the required fields
         return AuthResponse.builder()
                 .success(true)
                 .message("Login successful")
+                .token(token)
                 .userId(user.getId())
+                .loginId(user.getLoginId())
                 .name(user.getName())
                 .role(user.getRole().getName())
+                .user(AuthResponse.UserInfo.builder()
+                        .id(user.getId())
+                        .loginId(user.getLoginId())
+                        .role(user.getRole().getName())
+                        .name(user.getName())
+                        .build())
                 .build();
     }
 }

@@ -309,7 +309,7 @@ const StudentsPage = ({ globalSearch = '' }) => {
           </span>
           <FilterDropdown
             label="Class"
-            options={['9', '10', '11', '12']}
+            options={['6', '7', '8', '9', '10', '11', '12']}
             selectedValue={classFilter}
             onChange={(v) => { setClassFilter(v); setCurrentPage(1); }}
           />

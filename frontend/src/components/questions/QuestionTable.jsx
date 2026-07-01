@@ -35,28 +35,16 @@ const getDifficultyBadge = (difficulty) => {
 
 const getTypeBadge = (type) => {
   switch (type) {
-    case 'MCQ':
+    case 'MCQ_SINGLE':
       return (
         <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200">
           MCQ
-        </span>
-      );
-    case 'ONE_WORD':
-      return (
-        <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200">
-          ONE WORD
         </span>
       );
     case 'NUMERICAL':
       return (
         <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
           NUMERICAL
-        </span>
-      );
-    case 'DESCRIPTIVE':
-      return (
-        <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-violet-50 text-violet-700 border border-violet-200">
-          DESCRIPTIVE
         </span>
       );
     default:

@@ -14,10 +14,8 @@ const FALLBACK_SUBJECTS = [
 ];
 
 const QUESTION_TYPES = [
-  { value: 'MCQ', label: 'Multiple Choice Question (MCQ)' },
-  { value: 'ONE_WORD', label: 'One Word Answer' },
-  { value: 'NUMERICAL', label: 'Numerical Value Answer' },
-  { value: 'DESCRIPTIVE', label: 'Descriptive / Essay Question' }
+  { value: 'MCQ_SINGLE', label: 'Multiple Choice Question (MCQ)' },
+  { value: 'NUMERICAL', label: 'Numerical Value Answer' }
 ];
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
@@ -31,10 +29,17 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
       .then((data) => {
         if (data && data.length > 0) {
           setSubjectsList(data);
+          if (!isEditing) {
+            setFormData((prev) => ({
+              ...prev,
+              subjectId: Number(data[0].id),
+              subject: data[0].name
+            }));
+          }
         }
       })
       .catch((err) => console.error('Failed to load subjects for form:', err));
-  }, []);
+  }, [isEditing]);
 
   const displaySubjects = subjectsList.length > 0 ? subjectsList : FALLBACK_SUBJECTS;
 
@@ -42,7 +47,7 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
     subjectId: 1,
     subject: 'Mathematics',
     topic: '',
-    questionType: 'MCQ',
+    questionType: 'MCQ_SINGLE',
     difficulty: 'Medium',
     questionText: '',
     marks: 1,
@@ -64,7 +69,7 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
         subjectId: Number(initialData.subjectId || 1),
         subject: initialData.subject || 'Mathematics',
         topic: initialData.topic || '',
-        questionType: initialData.questionType || 'MCQ',
+        questionType: initialData.questionType || 'MCQ_SINGLE',
         difficulty: initialData.difficulty || 'Medium',
         questionText: initialData.questionText || '',
         marks: Number(initialData.marks) || 1,
@@ -75,15 +80,14 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
           C: initialData.options?.C || '',
           D: initialData.options?.D || ''
         },
-        correctAnswer: initialData.correctAnswer || (initialData.questionType === 'MCQ' ? 'A' : '')
+        correctAnswer: initialData.correctAnswer || (initialData.questionType === 'MCQ_SINGLE' ? 'A' : '')
       });
     } else {
-      const defaultSub = displaySubjects[0] || { id: 1, name: 'Mathematics' };
       setFormData({
-        subjectId: Number(defaultSub.id),
-        subject: defaultSub.name,
+        subjectId: 1,
+        subject: 'Mathematics',
         topic: '',
-        questionType: 'MCQ',
+        questionType: 'MCQ_SINGLE',
         difficulty: 'Medium',
         questionText: '',
         marks: 1,
@@ -98,7 +102,7 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
       });
     }
     setErrors({});
-  }, [initialData, subjectsList]);
+  }, [initialData]);
 
   useEffect(() => {
     if (apiErrors && Object.keys(apiErrors).length > 0) {
@@ -122,10 +126,8 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
     setFormData((prev) => {
       const updated = { ...prev, [field]: val };
       if (field === 'questionType') {
-        if (val === 'MCQ') {
+        if (val === 'MCQ_SINGLE') {
           updated.correctAnswer = 'A';
-        } else if (val === 'DESCRIPTIVE') {
-          updated.correctAnswer = '';
         } else {
           updated.correctAnswer = '';
         }
@@ -167,13 +169,13 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
       newErr.marks = 'Marks must be at least 1';
     }
 
-    if (formData.questionType === 'MCQ') {
+    if (formData.questionType === 'MCQ_SINGLE') {
       if (!formData.options.A.trim()) newErr.option_A = 'Option A is required';
       if (!formData.options.B.trim()) newErr.option_B = 'Option B is required';
       if (!formData.options.C.trim()) newErr.option_C = 'Option C is required';
       if (!formData.options.D.trim()) newErr.option_D = 'Option D is required';
       if (!formData.correctAnswer) newErr.correctAnswer = 'Please select the correct option';
-    } else if (formData.questionType === 'ONE_WORD' || formData.questionType === 'NUMERICAL') {
+    } else if (formData.questionType === 'NUMERICAL') {
       if (!formData.correctAnswer || !String(formData.correctAnswer).trim()) {
         newErr.correctAnswer = 'Correct Answer is required';
       }
@@ -191,11 +193,8 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
         ...formData,
         marks: Number(formData.marks)
       };
-      if (formData.questionType !== 'MCQ') {
+      if (formData.questionType !== 'MCQ_SINGLE') {
         delete payload.options;
-      }
-      if (formData.questionType === 'DESCRIPTIVE') {
-        delete payload.correctAnswer;
       }
       onSave(payload);
     }
@@ -238,10 +237,13 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
             <select
               value={formData.subjectId}
               onChange={(e) => handleChange('subjectId', e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border bg-white text-sm font-medium text-[#0F172A] focus:outline-none focus:ring-2 transition-all ${
-                errors.subject
-                  ? 'border-[#DC2626] focus:ring-[#DC2626]/20'
-                  : 'border-[#CBD5E1] focus:border-[#2563EB] focus:ring-[#2563EB]/20'
+              disabled={isEditing}
+              className={`w-full px-4 py-3 rounded-xl border text-sm font-medium text-[#0F172A] focus:outline-none focus:ring-2 transition-all ${
+                isEditing
+                  ? 'bg-slate-50 border-[#E2E8F0] text-[#64748B] cursor-not-allowed'
+                  : 'bg-white border-[#CBD5E1] focus:border-[#2563EB] focus:ring-[#2563EB]/20'
+              } ${
+                errors.subject ? 'border-[#DC2626] focus:ring-[#DC2626]/20' : ''
               }`}
             >
               {displaySubjects.map((sub) => (
@@ -288,7 +290,12 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
             <select
               value={formData.questionType}
               onChange={(e) => handleChange('questionType', e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] bg-white text-sm font-medium text-[#0F172A] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 transition-all"
+              disabled={isEditing}
+              className={`w-full px-4 py-3 rounded-xl border text-sm font-medium text-[#0F172A] focus:outline-none focus:ring-2 transition-all ${
+                isEditing
+                  ? 'bg-slate-50 border-[#E2E8F0] text-[#64748B] cursor-not-allowed'
+                  : 'border-[#CBD5E1] bg-white focus:border-[#2563EB] focus:ring-[#2563EB]/20'
+              }`}
             >
               {QUESTION_TYPES.map((type) => (
                 <option key={type.value} value={type.value}>
@@ -382,14 +389,12 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
         {/* Dynamic Section based on Question Type */}
         <div className="pt-4 border-t border-[#E2E8F0]">
           <h3 className="text-sm font-bold text-[#0F172A] mb-4">
-            {formData.questionType === 'MCQ' && 'Multiple Choice Options & Correct Answer'}
-            {formData.questionType === 'ONE_WORD' && 'One Word Expected Answer'}
+            {formData.questionType === 'MCQ_SINGLE' && 'Multiple Choice Options & Correct Answer'}
             {formData.questionType === 'NUMERICAL' && 'Numerical Value Expected Answer'}
-            {formData.questionType === 'DESCRIPTIVE' && 'Descriptive Question Settings'}
           </h3>
 
-          {/* If MCQ */}
-          {formData.questionType === 'MCQ' && (
+          {/* If MCQ_SINGLE */}
+          {formData.questionType === 'MCQ_SINGLE' && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {['A', 'B', 'C', 'D'].map((opt) => (
@@ -452,16 +457,16 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
             </div>
           )}
 
-          {/* If ONE_WORD or NUMERICAL */}
-          {(formData.questionType === 'ONE_WORD' || formData.questionType === 'NUMERICAL') && (
+          {/* If NUMERICAL */}
+          {formData.questionType === 'NUMERICAL' && (
             <div className="max-w-md">
               <label className="block text-xs font-bold uppercase tracking-wider text-[#475569] mb-2">
                 Correct Answer <span className="text-[#DC2626]">*</span>
               </label>
               <input
-                type={formData.questionType === 'NUMERICAL' ? 'number' : 'text'}
+                type="number"
                 step="any"
-                placeholder={formData.questionType === 'NUMERICAL' ? 'e.g. 150 or 0.33' : 'e.g. Mars'}
+                placeholder="e.g. 150 or 0.33"
                 value={formData.correctAnswer}
                 onChange={(e) => handleChange('correctAnswer', e.target.value)}
                 className={`w-full px-4 py-3 rounded-xl border text-sm font-medium text-[#0F172A] focus:outline-none focus:ring-2 transition-all ${
@@ -475,16 +480,6 @@ const QuestionForm = ({ initialData, onSave, onCancel, apiErrors }) => {
                   <AlertCircle size={12} /> {errors.correctAnswer}
                 </p>
               )}
-            </div>
-          )}
-
-          {/* If DESCRIPTIVE */}
-          {formData.questionType === 'DESCRIPTIVE' && (
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-[#64748B] flex items-center gap-3">
-              <HelpCircle size={18} className="text-[#2563EB] shrink-0" />
-              <span>
-                Descriptive questions require qualitative evaluator grading. No automated correct answer match is configured.
-              </span>
             </div>
           )}
         </div>

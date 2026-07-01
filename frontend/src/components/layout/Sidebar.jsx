@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
   GraduationCap, 
   BookOpen, 
-  HelpCircle, 
   FileText, 
   Award, 
   BarChart3, 
@@ -12,25 +12,39 @@ import {
   LogOut, 
   ChevronLeft, 
   ChevronRight,
-  Sparkles
+  Sparkles,
+  ClipboardList
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import logo from '../../assets/logo.png';
+import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = ({ activePage = 'Students', onNavigate }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard },
-    { name: 'Students', icon: Users },
-    { name: 'Teachers', icon: GraduationCap },
-    { name: 'Subjects', icon: BookOpen },
-    { name: 'Question Bank', icon: HelpCircle },
-    { name: 'Tests', icon: FileText },
-    { name: 'Results', icon: Award },
-    { name: 'Analytics', icon: BarChart3 },
-    { name: 'Settings', icon: Settings },
+    { name: 'Students', icon: Users, allowedRoles: ['ADMIN'] },
+    { name: 'Teachers', icon: GraduationCap, allowedRoles: ['ADMIN'] },
+    { name: 'Subjects', icon: BookOpen, allowedRoles: ['ADMIN', 'TEACHER'] },
+    { name: 'Tests', icon: FileText, allowedRoles: ['ADMIN', 'TEACHER'] },
+    { name: 'Evaluations', icon: ClipboardList, allowedRoles: ['ADMIN', 'TEACHER'] },
+    { name: 'Results', icon: Award, allowedRoles: ['ADMIN', 'TEACHER'] },
+    { name: 'Analytics', icon: BarChart3, allowedRoles: ['ADMIN'] },
+    { name: 'Settings', icon: Settings, allowedRoles: ['ADMIN'] },
   ];
+
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (!item.allowedRoles) return true;
+    return user && item.allowedRoles.includes(user.role);
+  });
 
   return (
     <aside
@@ -60,7 +74,7 @@ const Sidebar = ({ activePage = 'Students', onNavigate }) => {
 
       {/* Navigation Links */}
       <div className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const isActive = activePage === item.name;
           const Icon = item.icon;
 
@@ -105,7 +119,7 @@ const Sidebar = ({ activePage = 'Students', onNavigate }) => {
       {/* Logout Footer */}
       <div className="p-3 border-t border-[#E2E8F0]">
         <button
-          onClick={() => alert('Logout clicked (Mock UI)')}
+          onClick={handleLogout}
           className={`w-full flex items-center ${
             isCollapsed ? 'justify-center px-0' : 'justify-start px-3.5'
           } py-2.5 rounded-xl text-sm font-semibold text-[#DC2626] hover:bg-[#DC2626]/10 transition-colors`}

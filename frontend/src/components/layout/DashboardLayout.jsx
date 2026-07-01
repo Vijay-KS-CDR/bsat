@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopNav from './TopNav';
-import Dashboard from '../../pages/Dashboard';
 import { Sparkles, Construction } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -39,7 +38,13 @@ const DashboardLayout = ({ children }) => {
     if (path.startsWith('/teachers')) return 'Teachers';
     if (path.startsWith('/subjects')) return 'Subjects';
     if (path.startsWith('/question-bank')) return 'Question Bank';
+    if (path.startsWith('/tests')) return 'Tests';
+    if (path.startsWith('/evaluations')) return 'Evaluations';
+    if (path.startsWith('/results')) return 'Results';
     if (path.startsWith('/dashboard')) return 'Dashboard';
+    if (path.startsWith('/analytics')) return 'Analytics';
+    if (path.startsWith('/settings')) return 'Settings';
+    if (path.startsWith('/students') || path === '/') return 'Students';
     return 'Students';
   });
   
@@ -54,8 +59,18 @@ const DashboardLayout = ({ children }) => {
       setActivePage('Subjects');
     } else if (path.startsWith('/question-bank')) {
       setActivePage('Question Bank');
+    } else if (path.startsWith('/tests')) {
+      setActivePage('Tests');
+    } else if (path.startsWith('/evaluations')) {
+      setActivePage('Evaluations');
+    } else if (path.startsWith('/results')) {
+      setActivePage('Results');
     } else if (path.startsWith('/dashboard')) {
       setActivePage('Dashboard');
+    } else if (path.startsWith('/analytics')) {
+      setActivePage('Analytics');
+    } else if (path.startsWith('/settings')) {
+      setActivePage('Settings');
     } else if (path.startsWith('/students') || path === '/') {
       setActivePage('Students');
     }
@@ -67,7 +82,12 @@ const DashboardLayout = ({ children }) => {
     else if (page === 'Teachers') navigate('/teachers');
     else if (page === 'Subjects') navigate('/subjects');
     else if (page === 'Question Bank') navigate('/question-bank');
+    else if (page === 'Tests') navigate('/tests');
+    else if (page === 'Evaluations') navigate('/evaluations');
+    else if (page === 'Results') navigate('/results');
     else if (page === 'Dashboard') navigate('/dashboard');
+    else if (page === 'Analytics') navigate('/analytics');
+    else if (page === 'Settings') navigate('/settings');
   };
 
   const renderContent = () => {
@@ -76,11 +96,13 @@ const DashboardLayout = ({ children }) => {
       case 'Teachers':
       case 'Subjects':
       case 'Question Bank':
+      case 'Tests':
+      case 'Evaluations':
+      case 'Results':
+      case 'Dashboard':
         return React.isValidElement(children) 
           ? React.cloneElement(children, { activePage, globalSearch, onNavigate: handleNavigate })
           : children;
-      case 'Dashboard':
-        return <Dashboard />;
       default:
         return <FeaturePlaceholder pageName={activePage} />;
     }

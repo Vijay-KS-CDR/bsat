@@ -62,9 +62,7 @@ const Register = () => {
     setIsSubmitting(true);
     try {
       const { name, loginId, password, role } = formData;
-      console.log("Outgoing registration payload:", { name, loginId, password, role });
       const response = await registerUser({ name, loginId, password, role });
-      console.log("Registration successful response:", response);
       
       // The backend returns a valid response payload on success, but success boolean might be null.
       // So we check if the response is returned successfully.

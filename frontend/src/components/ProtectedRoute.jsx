@@ -20,7 +20,9 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    // Optionally redirect to an unauthorized page or dashboard
+    if (user.role === 'STUDENT') {
+      return <Navigate to="/student/dashboard" replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
 

@@ -26,4 +26,12 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
      * @return true if a student exists, false otherwise
      */
     boolean existsByAdmissionNumber(String admissionNumber);
+
+    /**
+     * Find a student by their associated User ID.
+     *
+     * @param userId the user ID to check
+     * @return an Optional containing the found Student, or empty
+     */
+    java.util.Optional<Student> findByUserId(Long userId);
 }

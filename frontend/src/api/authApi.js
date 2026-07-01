@@ -9,12 +9,21 @@ const authApi = axios.create({
   },
 });
 
-// Request interceptor to add token
+// Request interceptor to add token and purge legacy headers
 authApi.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Explicitly purge legacy authentication headers to ensure JWT is the sole source of truth
+  if (config.headers) {
+    delete config.headers['X-User-Id'];
+    delete config.headers['X-Student-Login-Id'];
+    delete config.headers['x-user-id'];
+    delete config.headers['x-student-login-id'];
+  }
+  
   return config;
 });
 
@@ -26,7 +35,12 @@ authApi.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('role');
       localStorage.removeItem('userId');
+      localStorage.removeItem('loginId');
       localStorage.removeItem('name');
+      
+      // Store session expiration notification message for Login screen
+      localStorage.setItem('authError', 'Session expired or unauthorized. Please log in again.');
+      
       // Redirect to login page
       window.location.href = '/login';
     }
@@ -45,12 +59,12 @@ export const loginUser = async (credentials) => {
 };
 
 export const getCurrentUser = async () => {
-  // Since the backend does not expose a /me endpoint, retrieve and return session data from local storage
   const userId = localStorage.getItem('userId');
-  const name = localStorage.getItem('name');
+  const loginId = localStorage.getItem('loginId');
   const role = localStorage.getItem('role');
-  if (userId && name && role) {
-    return { id: userId, name, role };
+  const name = localStorage.getItem('name');
+  if (userId && loginId && role) {
+    return { id: userId, loginId, role, name: name || loginId };
   }
   throw new Error("No user session found");
 };

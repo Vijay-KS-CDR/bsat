@@ -4,6 +4,7 @@ import com.broviders.bsat.dto.AuthResponse;
 import com.broviders.bsat.dto.LoginRequest;
 import com.broviders.bsat.dto.RegisterRequest;
 import com.broviders.bsat.entity.Role;
+import com.broviders.bsat.entity.Student;
 import com.broviders.bsat.entity.User;
 import com.broviders.bsat.repository.RoleRepository;
 import com.broviders.bsat.repository.UserRepository;
@@ -36,6 +37,12 @@ class AuthServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private com.broviders.bsat.repository.StudentRepository studentRepository;
+
+    @Mock
+    private com.broviders.bsat.security.JwtUtils jwtUtils;
 
     @InjectMocks
     private AuthService authService;
@@ -93,6 +100,8 @@ class AuthServiceTest {
         verify(roleRepository).findByName("STUDENT");
         verify(passwordEncoder).encode(request.getPassword());
         verify(userRepository).save(any(User.class));
+        verify(studentRepository).existsByAdmissionNumber(anyString());
+        verify(studentRepository).save(any(Student.class));
     }
 
     /**
@@ -133,6 +142,7 @@ class AuthServiceTest {
 
         when(userRepository.findByLoginId(request.getLoginId())).thenReturn(Optional.of(studentUser));
         when(passwordEncoder.matches(request.getPassword(), studentUser.getPassword())).thenReturn(true);
+        when(jwtUtils.generateToken(any(), any(), any())).thenReturn("mockToken");
 
         // Act
         AuthResponse response = authService.login(request);
@@ -141,13 +151,19 @@ class AuthServiceTest {
         assertNotNull(response);
         assertEquals(true, response.getSuccess());
         assertEquals("Login successful", response.getMessage());
+        assertEquals("mockToken", response.getToken());
         assertEquals(1L, response.getUserId());
-        assertNull(response.getLoginId());
+        assertEquals("vijay@gmail.com", response.getLoginId());
         assertEquals("STUDENT", response.getRole());
         assertEquals("Vijay", response.getName());
+        assertNotNull(response.getUser());
+        assertEquals(1L, response.getUser().getId());
+        assertEquals("vijay@gmail.com", response.getUser().getLoginId());
+        assertEquals("STUDENT", response.getUser().getRole());
 
         verify(userRepository).findByLoginId(request.getLoginId());
         verify(passwordEncoder).matches(request.getPassword(), studentUser.getPassword());
+        verify(jwtUtils).generateToken(1L, "vijay@gmail.com", "STUDENT");
     }
 
     /**
